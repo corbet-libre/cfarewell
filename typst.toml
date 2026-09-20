@@ -1,0 +1,9 @@
+[package]
+name = "cfarewell"
+version = "0.3.0"
+entrypoint = "typst/farewell.typ"
+authors = ["Julian Y. Richard Corbet"]
+license = "LGPL-3.0-only WITH LGPL-3.0-linking-exception"
+description = "Deterministic locale-correct valedictions for formal correspondence. Mirrors the cfarewell Rust crate release line."
+repository = "https://github.com/corbet-foss/cfarewell"
+exclude = [".git", ".github", ".crow", "target", "dist", "js", "py", "tests", "scripts"]

@@ -1,0 +1,9 @@
+[
+  { "name": "lowercase swiss german", "fn": "closing", "locale": "de-ch", "expected": "Freundliche Grüsse" },
+  { "name": "lowercase austrian german", "fn": "closing", "locale": "de-at", "expected": "Mit freundlichen Grüßen" },
+  { "name": "lowercase us english", "fn": "closing", "locale": "en-us", "expected": "Sincerely," },
+  { "name": "lowercase swiss french", "fn": "closing", "locale": "fr-ch", "expected": "Meilleures salutations," },
+  { "name": "lowercase british english", "fn": "closing", "locale": "en-gb", "expected": "Yours sincerely," },
+  { "name": "uppercase swiss german", "fn": "closing", "locale": "DE-CH", "expected": "Freundliche Grüsse" },
+  { "name": "uppercase us english", "fn": "closing", "locale": "EN-US", "expected": "Sincerely," }
+]

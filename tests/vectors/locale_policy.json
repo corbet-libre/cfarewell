@@ -1,0 +1,67 @@
+[
+  {
+    "name": "returned locale IDs are lowercase",
+    "fn": "available_locales",
+    "expected": [
+      "ar",
+      "bg",
+      "cs",
+      "da",
+      "de",
+      "de-at",
+      "de-ch",
+      "de-li",
+      "el",
+      "en",
+      "en-gb",
+      "en-us",
+      "es",
+      "es-mx",
+      "et",
+      "fi",
+      "fr",
+      "fr-ch",
+      "hu",
+      "id",
+      "it",
+      "it-ch",
+      "ja",
+      "ko",
+      "lt",
+      "lv",
+      "nb",
+      "nl",
+      "nl-be",
+      "pl",
+      "pt",
+      "pt-br",
+      "ro",
+      "ru",
+      "sk",
+      "sl",
+      "sv",
+      "tr",
+      "uk",
+      "zh"
+    ]
+  },
+  {
+    "name": "Liechtenstein closing",
+    "fn": "closing",
+    "locale": "de-li",
+    "expected": "Freundliche Grüsse"
+  },
+  {
+    "name": "mixed-case compatibility",
+    "fn": "closing",
+    "locale": "De-LI",
+    "expected": "Freundliche Grüsse"
+  },
+  {
+    "name": "explicit override is preserved",
+    "fn": "closing",
+    "locale": "de-li",
+    "override": "Grüße von Weiß",
+    "expected": "Grüße von Weiß"
+  }
+]
