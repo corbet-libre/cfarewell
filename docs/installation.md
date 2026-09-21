@@ -49,7 +49,7 @@ For an isolated CLI environment, use `pipx install cfarewell==0.3.0` or
 The wheel contains no native extensions and is platform independent. Release
 evidence records the Python version and operating system actually exercised.
 Verified wheels and source distributions are also attached to the
-[GitHub release](https://github.com/corbet-labs/cfarewell/releases/tag/v0.3.0).
+[GitHub release](https://github.com/corbet-foss/cfarewell/releases/tag/v0.3.0).
 
 ## JSR
 
