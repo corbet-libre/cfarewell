@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@corbet-foss/cfarewell",
+      "name": "@corbet-labs/cfarewell",
       "devDependencies": {
         "@types/node": "25.8.0",
         "typescript": "6.0.3",

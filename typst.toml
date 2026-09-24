@@ -1,6 +1,6 @@
 [package]
 name = "cfarewell"
-version = "0.3.0"
+version = "0.3.1"
 entrypoint = "typst/farewell.typ"
 authors = ["Julian Y. Richard Corbet"]
 license = "LGPL-3.0-only WITH LGPL-3.0-linking-exception"

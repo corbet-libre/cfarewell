@@ -1,6 +1,6 @@
 {
-  "name": "@corbet-foss/cfarewell",
-  "version": "0.3.0",
+  "name": "@corbet-labs/cfarewell",
+  "version": "0.3.1",
   "description": "Deterministic locale-correct valedictions for formal correspondence. Mirrors the cfarewell Rust crate release line.",
   "license": "LGPL-3.0-only WITH LGPL-3.0-linking-exception",
   "publishConfig": {
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/corbet-foss/cfarewell.git",
-    "directory": "js/@corbet-foss/cfarewell"
+    "directory": "js/@corbet-labs/cfarewell"
   },
   "type": "module",
   "main": "./dist/index.cjs",
