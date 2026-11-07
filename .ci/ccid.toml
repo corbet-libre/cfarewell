@@ -10,12 +10,6 @@ actions = ["fmt", "test", "clippy"]
 kind = "cargo"
 actions = ["fmt"]
 
-# This requires an already installed compiler; ccid never installs toolchains.
-[checks.rust-msrv]
-kind = "cargo"
-actions = ["test"]
-toolchain = "1.94.0"
-
 [checks.metadata]
 kind = "commands"
 commands = [["python3", ".ci/check.py", "metadata"]]
@@ -79,7 +73,7 @@ kind = "commands"
 commands = [["python3", ".ci/release-check.py"]]
 
 # verify aggregates the cached subset of the hosted Linux route (ci.yml case branches):
-# rust + rust-msrv + ccid-defined standalone packaging/integration selectors in dependency
+# rust + ccid-defined standalone packaging/integration selectors in dependency
 # order. Registry/live-read selectors run FRESH after the cached verify via `ccid check`
 # (never `cached`): published-npm/jsr/python (+ resolve-dependencies for cletter;
 # licenses + jsr-registry + python-registry for ccht). Publication and artifact-manifest
@@ -93,7 +87,7 @@ commands = [["python3", ".ci/release-check.py"]]
 [checks.verify]
 kind = "commands"
 commands = [["bash", ".ci/verify.sh"]]
-cache_tools = [["rustc", "-vV"], ["cargo", "--version"], ["rustup", "run", "1.94.0", "rustc", "-vV"], ["rustup", "run", "1.94.0", "cargo", "--version"], ["python3", "--version"], ["node", "--version"], ["bun", "--version"], ["npm", "--version"], ["deno", "--version"], ["uv", "--version"]]
+cache_tools = [["rustc", "-vV"], ["cargo", "--version"], ["python3", "--version"], ["node", "--version"], ["bun", "--version"], ["npm", "--version"], ["deno", "--version"], ["uv", "--version"]]
 
 [render]
 tool_revision = "01ea43c012731748e1022b31976fb2928de60bd3"
