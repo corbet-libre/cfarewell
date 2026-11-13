@@ -1,5 +1,9 @@
 # cfarewell
 
+<!-- ccid:security:begin (rendered by ccid render; do not edit by hand) -->
+**Security and dependencies:** kept up to date automatically (Renovate, with OSV vulnerability alerts); updates are merged when their tests pass. See the [security policy](SECURITY.md).
+<!-- ccid:security:end -->
+
 > **Superseded by [`cnice`](https://github.com/corbet-foss/cnice).**
 > New development continues as `cnice.farewell` (same API, same vectors);
 > this crate stays frozen at 0.3.1 and published grants are unchanged.
