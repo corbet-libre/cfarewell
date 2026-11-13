@@ -1,79 +1,14 @@
-# Focused validation and release preparation
+# Focused validation
 
-Crow runs `.ci/ccid.toml` through the pinned native `ccid` command library.
-The repository commands also work on a suitably provisioned build host.
-The dispatcher stages the committed source and reports evidence; builds run only in CI.
-GitHub Actions has an equivalent manual public-source check route, which the
-tag-triggered release workflow reuses as its credential-free preparation job.
+`.ci/ccid.toml` declares the checks and the one job, `verify`; `ccid` runs them and renders the
+workflow `.forgejo/workflows/ci.yml` from it. `verify` runs on every push to `main` and on every pull
+request of the primary forge: the cached `verify` check (`.ci/verify.sh`) and the live registry
+consumers `published-npm` and `published-python` (`.ci/run-cached.sh`). A copy on another forge runs no
+CI. The repository commands also work on a suitably provisioned build host.
 
-## Manual GitHub Actions route
-
-When hosted execution is available, free, and appropriate for the public inputs,
-run `.github/workflows/ci.yml` with a comma-separated `checks` selection. It uses
-the same repository commands on Linux with two Cargo build/test threads and a
-15-minute job limit. Default selection: `metadata,rust`. Rust selects current
-`stable`; no older minimum version is checked or promised.
-
-JavaScript, package, and published-consumer selectors provision only their needed
-hosted tools. For additional manager coverage, select `js-package` before
-`js-pnpm`, `js-yarn`, or `js-bun` in the same run. The resulting artifact contains
-package receipts plus `hosted-run.json`, with the source/archive/workflow identity,
-locked input hashes, actual tools, and final check outcome. Hosted evidence does
-not claim execution by ccid or native Windows/macOS coverage.
-
-Checks requiring operator-supplied artifact manifests (`rust-dependencies` and,
-where defined, `typst-preview`) stay on Crow. Private inputs and publishing
-credentials never enter this hosted workflow. Public registry consumer checks
-fail visibly when their exact dependency versions have not been published.
-
-This manual workflow is not an expanded automatic provider mapping. Keep any
-existing `.ci/providers.toml` pilot unchanged until equivalent hosted execution
-and fallback identity are proved. Confirm unavailable execution before falling
-back to Crow; a failed test is not provider unavailability. `release.yml` calls
-it through `workflow_call` with the release selectors; the call runs at the
-release commit, so `hosted-run.json` still records this workflow's exact bytes
-and the tag's source archive. Publication stays in a separate job.
-
-## Publishing prepared artifacts
-
-The checked-in `.ci/publish.py` adapter uses the exact shared publisher resource
-from the release workflow's verified ccid archive. It imports existing source
-archives, preparation receipts and tested packages into one reviewed bundle;
-producer identities remain distinct from later CI/publisher commits. See the
-[shared import and publication contract](https://github.com/corbet-libs/ccid/blob/27c248aefa3c7198be6716a884d290c717774b21/adapters/registry-publish.md).
-
-A pushed `vX.Y.Z` tag runs `.github/workflows/release.yml` (see
-[releasing](../docs/releasing.md)). `prepare` calls `ci.yml` without credentials;
-`bundle` imports its exact packages for every registry, inspects the bundle and
-creates the GitHub release with `publication-bundle.tar`; `publish` alone gets
-`id-token: write`. It reconciles all channels, publishes missing Cargo packages
-through `rust-lang/crates-io-auth-action` and JSR through GitHub OIDC, and
-reports npm and PyPI as deferred until their trusted publisher rules exist.
-Those two are uploaded from the same release bundle by an operator with registry
-tokens outside hosted CI. Dispatching the workflow with `tag` publishes from an
-existing release bundle; dispatching it without `tag` rehearses the bundle.
-The existing release/tag is verified before uploads. Persistent local and
-immutable GitHub release journals prevent retries after an ambiguous upload,
-including across providers; no registry restriction is automatically changed.
-
-The manual Crow `release` workflow remains the fallback route. Supply
-`RELEASE_BUNDLE` (an existing worker file), `RELEASE_BUNDLE_SHA256`, and optionally
-`RELEASE_CHANNELS`; select exactly one registry with `RELEASE_OPERATION=publish`
-for an intended upload. `publish` with `all` is refused; status can inspect all.
-Bundle inspection has no credentials. Registry status loads only the GitHub
-release token; publication loads that token and the selected registry
-token in its own guarded step. Missing tokens for other registries do
-not block inspection, status or a selected upload. No build occurs with these
-credentials. Crow and GitHub Actions pin the same publisher revision.
-
-These adapters do not expand automatic provider mappings, create release tags,
-or establish hosted/native execution proof. Existing check recipes and the
-release publisher have separate explicit tool pins. Select `release-config` to
-check adapter identities, the tag trigger, Python/shell syntax and per-job
-credential boundaries without compiling products or accessing registries. Actionlint is required: Crow
-uses the existing tool on PATH or in the Nix store; hosted setup provisions it
-only for this selector. Evidence records its actual path and version. The
-repository checker installs nothing and fails if the required tool is absent.
+Registry packages are not made by `verify`. The release run packs the crate, the npm tarball and the
+PyPI files once, from the commit, with the `pack` check of `[release]`; see
+[releasing](../docs/releasing.md).
 
 Select checks from changed inputs and missing evidence. A changed README does not
 require another Rust build. Table/API changes need affected language vectors;
@@ -84,7 +19,6 @@ only for matching source, dependency closure, tools, configuration and environme
 | Selector | Coverage |
 | --- | --- |
 | `metadata` | Version alignment and byte-for-byte generated assets |
-| `release-config` | Release adapter contract (tag trigger, job permissions, OIDC routes, publisher pin) and Python/shell syntax; required provisioned Actionlint |
 | `fmt` | Rust formatting only |
 | `rust` | Locked Rust tests including doctests, formatting, Clippy with denied warnings |
 | `javascript` | Strict TypeScript and shared source vectors |
@@ -94,30 +28,29 @@ only for matching source, dependency closure, tools, configuration and environme
 | `python-package` | Wheel/sdist, installed-wheel vectors, metadata and JSON CLI consumers |
 | `typst-package` | Deterministic archive and actual installed Typst import |
 | `rust-dependencies` | Pre-publication source tests using checksum-verified sibling crates in private scratch |
-| `published-npm`, `published-jsr`, `published-python` | Consumers of the exact version on the selected live registry |
+| `published-npm`, `published-python` | Consumers of the exact version on the selected live registry; a version that is not published yet is skipped |
 
-For example, use the existing dispatcher:
-
-```sh
-crow-ci plan --repo . --workflow ccid --var CHECKS=metadata,rust
-crow-ci run --repo . --workflow ccid --var CHECKS=metadata,rust
-```
-
-Before an initial release, choose all affected source and distribution checks:
+For example, plan and run a selection:
 
 ```sh
-crow-ci run --repo . --workflow ccid \
-  --var CHECKS=metadata,rust,javascript,rust-package,js-package,python-package,typst-package \
-  --var ARTIFACT_ROOT=/absolute/persistent/release-artifacts
+ccid check --repo . --check metadata,rust --plan
+ccid check --repo . --check metadata,rust
 ```
 
-`ARTIFACT_ROOT` is a worker path supplied by the operator. Each package selector
+To check every source and distribution selector:
+
+```sh
+ccid check --repo . \
+  --check metadata,rust,javascript,rust-package,js-package,python-package,typst-package
+```
+
+With `ARTIFACT_ROOT` set to an absolute worker path, each package selector
 exports immutable files under `<root>/<package>/<commit>/`, plus its own JSON
 receipt, `SOURCE_COMMIT`, and an aggregate `SHA256SUMS`. Additional manager checks
 require `js-package` evidence for that exact commit. They never rebuild the tarball.
 Use them when manager/export/packaging behavior changed; do not repeat all managers
-for every source edit. Publication uploads the verified files separately using
-registry credentials outside these verification jobs.
+for every source edit. These files are verification evidence: the files that are
+published come from the release run's `pack` check.
 
 For unpublished sibling dependencies, supply `DEPENDENCY_MANIFEST` and
 `DEPENDENCY_MANIFEST_SHA256`. The manifest is an exact JSON document:
@@ -151,9 +84,7 @@ namespaces Cargo targets by canonical repository identity. It verifies source an
 tool digests, preserves unchanged source freshness, supervises timeout/cancellation,
 and never clears caches or installs system tools. Commands that generate source or
 install dependencies run in owned scratch copies, preserving the verified input
-tree and its reusable Rust timestamps. The dispatcher checks host
-headroom, attaches to identical active work, and refuses a repeated completed
-request unless an operator explicitly requests a diagnosed rerun.
+tree and its reusable Rust timestamps.
 
 Inspect existing runs before dispatch. After a failed Python check, select Python
 again after correcting its inputs; a passed unrelated Rust check remains evidence.

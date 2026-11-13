@@ -6,8 +6,8 @@ exec 2>&1
 : "${CI_COMMIT_SHA:?Missing verified source revision}"
 : "${CI_REPOSITORY_URL:?Missing canonical repository identity}"
 : "${CHECKS:?Missing declared check selection}"
-if [ "$CHECKS" != "verify,published-npm,published-jsr,published-python" ]; then
-  echo "CHECKS must be exactly 'verify,published-npm,published-jsr,published-python', got: $CHECKS" >&2
+if [ "$CHECKS" != "verify,published-npm,published-python" ]; then
+  echo "CHECKS must be exactly 'verify,published-npm,published-python', got: $CHECKS" >&2
   exit 2
 fi
 test -f Cargo.lock || { echo 'Cargo.lock must be present (committed snapshot)' >&2; exit 2; }
@@ -25,7 +25,7 @@ mkdir -p "$state/moon-cache/hashes" "$state/moon-cache/outputs" "$state/moon-hom
 mkdir -p .moon/cache
 # Binding gates: node+npm serve check.py js-package/managers (npx fetches pinned pnpm@10/yarn@1
 # per-run; bun.lock stays frozen); bun serves install/typecheck/conformance; deno serves
-# js-package dry-run/published-jsr; uv+python3 serve hatchling wheel/sdist + typst==0.15.0 packaging.
+# js-package dry-run; uv+python3 serve hatchling wheel/sdist + typst==0.15.0 packaging.
 tool_source=github:NixOS/nixpkgs/b7c2ada94fe99c15b0dbcf4d11fd7850b957a436
 tool_paths=$(nix build --no-link --print-out-paths "$tool_source#moon" "$tool_source#proto" "$tool_source#nodejs_24" "$tool_source#bun" "$tool_source#deno" "$tool_source#uv" "$tool_source#python3")
 for path in $tool_paths; do PATH="$path/bin:$PATH"; done
@@ -86,5 +86,4 @@ uv --version
 test -s ".ccid/results/verify.jsonl"
 # Registry/live-read selectors stay FRESH: `check`, never `cached`.
 "$CCID_BIN" check --repo "$PWD" --check "published-npm"
-"$CCID_BIN" check --repo "$PWD" --check "published-jsr"
 "$CCID_BIN" check --repo "$PWD" --check "published-python"

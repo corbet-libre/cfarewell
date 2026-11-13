@@ -242,9 +242,9 @@ def version_published(channel):
 
 
 def published(channel):
-    # A version the registry does not have yet is a release in waiting: a release tag hands it to the srv release flow
-    # (infra hosts/nixnas-release-publish.nix), which publishes it and then runs this workflow on main again, so these
-    # consumer checks run against the published package. Only a 404 for the exact version skips; any other answer fails.
+    # A version the registry does not have yet is a release in waiting: the release run publishes it and then runs this
+    # workflow on main again, so these consumer checks run against the published package. Only a 404 for the exact
+    # version skips; any other answer fails.
     if not version_published(channel):
         print(f"published-{channel}: {NAME} {VERSION} is not on the registry yet (a release in waiting): skipped")
         return
